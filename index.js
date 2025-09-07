@@ -1,5 +1,6 @@
 const { Client, GatewayIntentBits, Events, EmbedBuilder } = require('discord.js');
 const { translateText } = require('./utils/translator');
+const { detectLanguage, getLanguageName, getLanguageEmoji, determineTranslationDirection } = require('./utils/languageDetector');
 require('dotenv').config();
 
 // 디스코드 클라이언트 생성
@@ -37,10 +38,13 @@ client.on(Events.MessageCreate, async message => {
         await handleStatusCommand(message);
     }
     
-    // 자동 번역 (특정 채널에서만)
-    if (message.channel.name === 'taiwanese-chat' || message.channel.name === '대만어-채팅' || message.channel.name === '번역-채널') {
-        await handleAutoTranslate(message);
+    // 설정 명령어
+    if (message.content.startsWith('!설정') || message.content.startsWith('!settings')) {
+        await handleSettingsCommand(message);
     }
+    
+    // 실시간 자동 번역 (모든 채널에서)
+    await handleRealTimeTranslate(message);
     
     // 메시지 반응으로 번역 (다른 사람 메시지에 반응)
     if (message.reference && message.reference.messageId) {
@@ -89,24 +93,49 @@ async function handleTranslateCommand(message) {
     }
 }
 
-// 자동 번역 처리
-async function handleAutoTranslate(message) {
+// 실시간 자동 번역 처리 (양방향)
+async function handleRealTimeTranslate(message) {
     try {
-        const translatedText = await translateText(message.content, 'zh-tw', 'ko');
+        const text = message.content.trim();
+        
+        // 빈 메시지나 봇 메시지는 무시
+        if (!text || message.author.bot) return;
+        
+        // 명령어는 무시
+        if (text.startsWith('!')) return;
+        
+        // 언어 감지
+        const detectedLang = detectLanguage(text);
+        
+        // 알 수 없는 언어는 무시
+        if (detectedLang === 'unknown') return;
+        
+        // 번역 방향 결정
+        const translation = determineTranslationDirection(detectedLang);
+        
+        // 같은 언어면 번역하지 않음
+        if (translation.source === translation.target) return;
+        
+        // 번역 실행
+        const translatedText = await translateText(text, translation.source, translation.target);
         
         // 원문과 번역이 다른 경우에만 번역 메시지 전송
-        if (translatedText !== message.content) {
+        if (translatedText !== text) {
             const embed = new EmbedBuilder()
-                .setColor('#95e1d3')
-                .setTitle('🌐 자동 번역')
-                .setDescription(translatedText)
+                .setColor('#4ecdc4')
+                .setTitle('🌐 실시간 번역')
+                .setDescription(`**${getLanguageEmoji(translation.source)} ${getLanguageName(translation.source)} → ${getLanguageEmoji(translation.target)} ${getLanguageName(translation.target)}**`)
+                .addFields(
+                    { name: '📝 원문', value: text.length > 1000 ? text.substring(0, 1000) + '...' : text, inline: false },
+                    { name: '🔄 번역', value: translatedText.length > 1000 ? translatedText.substring(0, 1000) + '...' : translatedText, inline: false }
+                )
                 .setTimestamp()
                 .setFooter({ text: `${message.author.username}님의 메시지` });
             
             message.reply({ embeds: [embed] });
         }
     } catch (error) {
-        console.error('자동 번역 오류:', error);
+        console.error('실시간 번역 오류:', error);
     }
 }
 
@@ -120,6 +149,13 @@ async function handleHelpCommand(message) {
 async function handleStatusCommand(message) {
     const { execute } = require('./commands/status');
     await execute(message, []);
+}
+
+// 설정 명령어 처리
+async function handleSettingsCommand(message) {
+    const { execute } = require('./commands/settings');
+    const args = message.content.split(' ').slice(1);
+    await execute(message, args);
 }
 
 // 메시지 반응으로 번역 처리

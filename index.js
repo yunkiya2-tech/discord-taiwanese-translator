@@ -104,20 +104,32 @@ async function handleRealTimeTranslate(message) {
         // 명령어는 무시
         if (text.startsWith('!')) return;
         
+        console.log(`🔍 실시간 번역 시도: "${text}"`);
+        
         // 언어 감지
         const detectedLang = detectLanguage(text);
+        console.log(`🌐 감지된 언어: ${detectedLang}`);
         
         // 알 수 없는 언어는 무시
-        if (detectedLang === 'unknown') return;
+        if (detectedLang === 'unknown') {
+            console.log('❌ 알 수 없는 언어로 번역 건너뜀');
+            return;
+        }
         
         // 번역 방향 결정
         const translation = determineTranslationDirection(detectedLang);
+        console.log(`🔄 번역 방향: ${translation.source} → ${translation.target}`);
         
         // 같은 언어면 번역하지 않음
-        if (translation.source === translation.target) return;
+        if (translation.source === translation.target) {
+            console.log('❌ 같은 언어로 번역 건너뜀');
+            return;
+        }
         
         // 번역 실행
+        console.log('🚀 번역 시작...');
         const translatedText = await translateText(text, translation.source, translation.target);
+        console.log(`✅ 번역 완료: "${translatedText}"`);
         
         // 원문과 번역이 다른 경우에만 번역 메시지 전송
         if (translatedText !== text) {
@@ -133,9 +145,12 @@ async function handleRealTimeTranslate(message) {
                 .setFooter({ text: `${message.author.username}님의 메시지` });
             
             message.reply({ embeds: [embed] });
+            console.log('📤 번역 메시지 전송 완료');
+        } else {
+            console.log('❌ 번역 결과가 원문과 같아서 메시지 전송 안함');
         }
     } catch (error) {
-        console.error('실시간 번역 오류:', error);
+        console.error('❌ 실시간 번역 오류:', error);
     }
 }
 

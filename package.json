@@ -1,0 +1,22 @@
+{
+  "name": "discord-taiwanese-translator",
+  "version": "1.0.0",
+  "description": "디스코드 대만어-한국어 번역 봇",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "heroku-postbuild": "echo 'Build completed'"
+  },
+  "keywords": ["discord", "bot", "translation", "taiwanese", "korean"],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}

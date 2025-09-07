@@ -1,0 +1,31 @@
+{
+  "name": "Discord Taiwanese Translator Bot",
+  "description": "디스코드 대만어-한국어 번역 봇",
+  "repository": "https://github.com/yourusername/discord-taiwanese-translator",
+  "logo": "https://cdn.discordapp.com/avatars/your-bot-id/your-bot-avatar.png",
+  "keywords": ["discord", "bot", "translation", "taiwanese", "korean"],
+  "env": {
+    "DISCORD_TOKEN": {
+      "description": "디스코드 봇 토큰",
+      "required": true
+    },
+    "GOOGLE_TRANSLATE_API_KEY": {
+      "description": "Google Translate API 키 (선택사항)",
+      "required": false
+    },
+    "PAPAGO_CLIENT_ID": {
+      "description": "Papago API 클라이언트 ID (선택사항)",
+      "required": false
+    },
+    "PAPAGO_CLIENT_SECRET": {
+      "description": "Papago API 클라이언트 시크릿 (선택사항)",
+      "required": false
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "free"
+    }
+  }
+}

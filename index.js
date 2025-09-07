@@ -215,3 +215,18 @@ async function handleReplyTranslate(message) {
 
 // 봇 로그인
 client.login(process.env.DISCORD_TOKEN);
+
+// Render 포트 설정 (웹 서비스로 실행 시)
+const PORT = process.env.PORT || 3000;
+if (process.env.PORT) {
+    const express = require('express');
+    const app = express();
+    
+    app.get('/', (req, res) => {
+        res.send('Discord Taiwanese Translator Bot is running!');
+    });
+    
+    app.listen(PORT, () => {
+        console.log(`🌐 Web server running on port ${PORT}`);
+    });
+}
